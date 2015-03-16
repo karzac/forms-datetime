@@ -100,6 +100,34 @@ class DateTimeInputTest extends \Tester\TestCase
 		Assert::true($dq->has("input[value='12:00']"));
 	}
 
+	public function testDisabledHtml()
+	{
+		$form = new \Nette\Forms\Form;
+		$control = new DateTimeInput;
+		$form->addComponent($control, 'datetime');
+		$control->setValue(new DateTimeImmutable('1978-01-23 12:00:00'));
+		$control->setDisabled();
+
+		$dq = \Tester\DomQuery::fromHtml((string) $control->getControl());
+
+		Assert::false($dq->has("input[value='1978-01-23']"));
+		Assert::false($dq->has("input[value='12:00']"));
+	}
+
+	public function testLabelHtml()
+	{
+		$control = $this->createControl();
+		Assert::null($control->getLabelPart());
+	}
+
+	/**
+	 * @throws \Nette\InvalidArgumentException
+	 */
+	public function testInvalidControlPart() {
+		$control = $this->createControl();
+		$control->getControlPart("test");
+	}
+
 	public function testLoadHttpDataEmpty()
 	{
 		$control = $this->createControl();
