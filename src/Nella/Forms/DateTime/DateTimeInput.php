@@ -32,6 +32,8 @@ class DateTimeInput extends \Nette\Forms\Controls\BaseControl
 	const NAME_DATE = 'date';
 	const NAME_TIME = 'time';
 
+	const VALID = 'Nella\Forms\DateTime\DateTimeInput::validateDateTime';
+
 	/** @var bool */
 	private static $registered = FALSE;
 

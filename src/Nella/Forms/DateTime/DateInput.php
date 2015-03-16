@@ -24,6 +24,8 @@ class DateInput extends \Nette\Forms\Controls\BaseControl
 
 	const DEFAULT_FORMAT = 'Y-m-d';
 
+	const VALID = 'Nella\Forms\DateTime\DateInput::validateDate';
+
 	/** @var bool */
 	private static $registered = FALSE;
 
