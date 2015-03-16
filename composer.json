@@ -19,7 +19,7 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"Nella\\Forms\\DateTime\\": "src/Nella/Forms/DateTime"
+			"Nella\\Forms\\": "src/Nella/Forms"
 		}
 	},
 	"autoload-dev": {
@@ -27,12 +27,14 @@
 	},
 	"require": {
 		"php": ">=5.5.0",
+		"nette/di": "~2.2,<2.4.0",
 		"nette/forms": "~2.2,<2.4.0"
 	},
 	"require-dev": {
 		"jakub-onderka/php-console-highlighter": "~0.3.1",
 		"jakub-onderka/php-parallel-lint": "~0.8.0",
 		"nette/tester": "~1.3.2.1",
+		"nette/bootstrap": "~2.2,<2.4.0",
 		"nella/coding-standard": "~2.0.0",
 		"satooshi/php-coveralls": "dev-master#2fbf803"
 	},

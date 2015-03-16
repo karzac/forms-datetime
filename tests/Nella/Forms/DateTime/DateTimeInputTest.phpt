@@ -207,6 +207,14 @@ class DateTimeInputTest extends \Tester\TestCase
 		Assert::same($form, $control->getForm());
 	}
 
+	public function testRegistrationThroughExtension()
+	{
+		(new \Nella\Forms\ContainerFactory)->create();
+		$form = new \Nette\Forms\Form;
+		$control = $form->addDateTime('test', 'Test');
+		Assert::type('Nella\Forms\DateTime\DateTimeInput', $control);
+	}
+
 	private function createControl($data = array())
 	{
 		$_SERVER['REQUEST_METHOD'] = 'POST';
