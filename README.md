@@ -7,12 +7,11 @@ Date/DateTime control for [Nette Framework](http://nette.org)
 [![Latest Stable Version](https://img.shields.io/packagist/v/nella/forms-datetime.svg?style=flat-square)](https://packagist.org/packages/nella/forms-datetime)
 [![Composer Downloads](https://img.shields.io/packagist/dt/nella/forms-datetime.svg?style=flat-square)](https://packagist.org/packages/nella/forms-datetime)
 [![Dependency Status](https://img.shields.io/versioneye/d/user/projects/5467a35df8a4aeff6c0000e5.svg?style=flat-square)](https://www.versioneye.com/user/projects/5467a35df8a4aeff6c0000e5)
-[![HHVM Status](https://img.shields.io/hhvm/nella/forms-datetime.svg?style=flat-square)](http://hhvm.h4cc.de/package/nella/forms-datetime)
 
 Requirements
 ------------
-- Nette >=2.2.0 (2.2.x support will be removed on 31 Jan 2016)
-- PHP >=5.4.0 (5.4.x support will be removed on 14 Sep 2015)
+- Nette >=2.3.0 (2.3.x support will be removed on 31 Jan 2017)
+- PHP >=5.5.0 (5.5.x support will be removed on 10 Jul 2016)
 
 Installation
 ------------

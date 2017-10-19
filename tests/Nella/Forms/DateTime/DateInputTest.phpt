@@ -27,11 +27,11 @@ class DateInputTest extends \Tester\TestCase
 	 */
 	public function dataValidDateValues()
 	{
-		return array(
-			array(NULL, NULL),
-			array(new DateTimeImmutable('1978-01-23 00:00:00'), new DateTimeImmutable('1978-01-23 00:00:00')),
-			array(new DateTime('1978-01-23 00:00:00'), new DateTimeImmutable('1978-01-23 00:00:00')),
-		);
+		return [
+			[NULL, NULL],
+			[new DateTimeImmutable('1978-01-23 00:00:00'), new DateTimeImmutable('1978-01-23 00:00:00')],
+			[new DateTime('1978-01-23 00:00:00'), new DateTimeImmutable('1978-01-23 00:00:00')],
+		];
 	}
 
 	/**
@@ -39,11 +39,11 @@ class DateInputTest extends \Tester\TestCase
 	 */
 	public function dataValidDates()
 	{
-		return array(
-			array(NULL, NULL),
-			array('', NULL),
-			array('1978-01-23', new DateTimeImmutable('1978-01-23 00:00:00')),
-		);
+		return [
+			[NULL, NULL],
+			['', NULL],
+			['1978-01-23', new DateTimeImmutable('1978-01-23 00:00:00')],
+		];
 	}
 
 	/**
@@ -51,18 +51,18 @@ class DateInputTest extends \Tester\TestCase
 	 */
 	public function dataInvalidDates()
 	{
-		return array(
-			array(FALSE),
-			array('1978/01/23'),
-			array(254358000),
-		);
+		return [
+			[FALSE],
+			['1978/01/23'],
+			[254358000],
+		];
 	}
 
 	/**
 	 * @dataProvider dataValidDateValues
 	 *
-	 * @param DateTimeImmutable|NULL
-	 * @param DateTimeImmutable|NULL
+	 * @param DateTimeImmutable|NULL $input
+	 * @param DateTimeImmutable|NULL $expected
 	 */
 	public function testValidDates($input, $expected)
 	{
@@ -77,7 +77,7 @@ class DateInputTest extends \Tester\TestCase
 	 * @dataProvider dataInvalidDates
 	 * @throws \Nette\InvalidArgumentException
 	 *
-	 * @param string
+	 * @param string $input
 	 */
 	public function testInvalidDates($input)
 	{
@@ -108,23 +108,23 @@ class DateInputTest extends \Tester\TestCase
 	/**
 	 * @dataProvider dataValidDates
 	 *
-	 * @param mixed
-	 * @param DateTimeImmutable|NULL
+	 * @param mixed $input
+	 * @param DateTimeImmutable|NULL $expected
 	 */
 	public function testLoadHttpDataValid($input, $expected)
 	{
-		$control = $this->createControl(array(
+		$control = $this->createControl([
 			'date' => $input,
-		));
+		]);
 
 		Assert::equal($expected, $control->getValue());
 	}
 
 	public function testLoadHttpDataInvalid()
 	{
-		$control = $this->createControl(array(
+		$control = $this->createControl([
 			'date' => 'test',
-		));
+		]);
 
 		$control->addRule([$control, 'validateDate'], 'test');
 
@@ -134,14 +134,14 @@ class DateInputTest extends \Tester\TestCase
 		$control->validate();
 
 		Assert::true($control->hasErrors());
-		Assert::equal(array('test'), $control->getErrors());
+		Assert::equal(['test'], $control->getErrors());
 	}
 
 	public function testLoadHttpDataInvalidDate()
 	{
-		$control = $this->createControl(array(
+		$control = $this->createControl([
 			'date' => '2015-02-31',
-		));
+		]);
 
 		$control->addRule([$control, 'validateDate'], 'test');
 
@@ -151,7 +151,129 @@ class DateInputTest extends \Tester\TestCase
 		$control->validate();
 
 		Assert::true($control->hasErrors());
-		Assert::equal(array('test'), $control->getErrors());
+		Assert::equal(['test'], $control->getErrors());
+	}
+
+	public function testAttribute()
+	{
+		$control = $this->createControl();
+
+		$control->setAttribute('readonly', 'readonly');
+
+		Assert::equal('readonly', $control->getControl()->readonly);
+	}
+
+	public function testDisabled()
+	{
+		$control = $this->createControl();
+
+		Assert::false($control->getControl()->disabled);
+
+		$control->setDisabled();
+
+		Assert::true($control->getControl()->disabled);
+	}
+
+	/**
+	 * @return array[]|array
+	 */
+	public function dataNonStrictDates()
+	{
+		$data = $this->dataValidDates();
+		$data[] = ['1978 - 01 - 23', new DateTimeImmutable('1978-01-23 00:00:00')];
+		return $data;
+	}
+
+	/**
+	 * @dataProvider dataNonStrictDates
+	 *
+	 * @param mixed $input
+	 * @param DateTimeImmutable|NULL $expected
+	 */
+	public function testNonStrictLoadHttpDataValid($input, $expected)
+	{
+		$control = $this->createControl([
+			'date' => $input,
+		]);
+		$control->disableStrict();
+
+		Assert::equal($expected, $control->getValue());
+	}
+
+	public function testLoadHttpDataValidStrictDate()
+	{
+		$control = $this->createControl([
+			'date' => '1978-01-23',
+		], TRUE);
+
+		$control->addRule([$control, 'validateDate'], 'test');
+
+		Assert::true($control->isFilled());
+		Assert::equal(new DateTimeImmutable('1978-01-23 00:00:00'), $control->getValue());
+
+		$control->validate();
+
+		Assert::false($control->hasErrors());
+	}
+
+	public function testLoadHttpDataInvalidStrictDate()
+	{
+		$control = $this->createControl([
+			'date' => '2015 - 02 - 31',
+		], TRUE);
+
+		$control->addRule([$control, 'validateDate'], 'test');
+
+		Assert::true($control->isFilled());
+		Assert::null($control->getValue());
+
+		$control->validate();
+
+		Assert::true($control->hasErrors());
+		Assert::equal(['test'], $control->getErrors());
+	}
+
+	public function testInvalidRequired()
+	{
+		$control = $this->createControl([
+			'date' => '2012-02-31',
+		], TRUE);
+
+		$control->setRequired('test');
+
+		Assert::true($control->isFilled());
+		Assert::null($control->getValue());
+
+		$control->validate();
+
+		Assert::true($control->hasErrors());
+		Assert::equal(['test'], $control->getErrors());
+	}
+
+	/**
+	 * @throws \Nette\InvalidArgumentException
+	 */
+	public function testRequiredInvalidMessage()
+	{
+		$control = $this->createControl();
+
+		$control->setRequired([]);
+	}
+
+	public function testRequired()
+	{
+		$control = $this->createControl();
+
+		$control->setRequired('Required');
+		Assert::true($control->isRequired());
+	}
+
+	public function testOptional()
+	{
+		$control = $this->createControl();
+
+		$control->setRequired(FALSE);
+		Assert::false($control->isRequired());
 	}
 
 	/**
@@ -183,14 +305,19 @@ class DateInputTest extends \Tester\TestCase
 		Assert::type('Nella\Forms\DateTime\DateInput', $control);
 	}
 
-	private function createControl($data = array())
+	private function createControl($data = [], $strict = FALSE)
 	{
 		$_SERVER['REQUEST_METHOD'] = 'POST';
-		$_FILES = array();
+		$_FILES = [];
 		$_POST = $data;
 
 		$form = new \Nette\Forms\Form;
 		$control = new DateInput;
+		if ($strict) {
+			$control->enableStrict();
+		} else {
+			$control->disableStrict();
+		}
 		$form->addComponent($control, 'date');
 
 		return $control;

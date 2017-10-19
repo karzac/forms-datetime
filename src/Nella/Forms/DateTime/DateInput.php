@@ -11,6 +11,7 @@
 namespace Nella\Forms\DateTime;
 
 use Nette\Forms\Container;
+use Nette\Forms\Form;
 
 /**
  * Date input form control
@@ -32,9 +33,12 @@ class DateInput extends \Nette\Forms\Controls\BaseControl
 	/** @var string */
 	private $format;
 
+	/** @var bool */
+	private $strict = FALSE;
+
 	/**
-	 * @param string
-	 * @param string|NULL
+	 * @param string $format
+	 * @param string|NULL $label
 	 */
 	public function __construct($format = self::DEFAULT_FORMAT, $label = NULL)
 	{
@@ -45,7 +49,25 @@ class DateInput extends \Nette\Forms\Controls\BaseControl
 	}
 
 	/**
-	 * @param \DateTimeInterface|NULL
+	 * @return \Nella\Forms\DateTime\DateInput
+	 */
+	public function enableStrict()
+	{
+		$this->strict = TRUE;
+		return $this;
+	}
+
+	/**
+	 * @return \Nella\Forms\DateTime\DateInput
+	 */
+	public function disableStrict()
+	{
+		$this->strict = FALSE;
+		return $this;
+	}
+
+	/**
+	 * @param \DateTimeInterface|NULL $value
 	 * @return \Nella\Forms\DateTime\DateInput
 	 */
 	public function setValue($value = NULL)
@@ -86,7 +108,25 @@ class DateInput extends \Nette\Forms\Controls\BaseControl
 
 	public function loadHttpData()
 	{
-		parent::setValue($this->getHttpData(\Nette\Forms\Form::DATA_TEXT));
+		$input = $this->getHttpData(\Nette\Forms\Form::DATA_TEXT);
+		if (empty($input)) {
+			parent::setValue(NULL);
+			return;
+		}
+
+		$datetime = \DateTimeImmutable::createFromFormat(
+			$this->normalizeFormat($this->format),
+			$this->normalizeFormat($input)
+		);
+
+		if ($datetime !== FALSE
+			&& $datetime->format($this->normalizeFormat($this->format)) === $this->normalizeFormat($input)
+		) {
+			parent::setValue($datetime->format($this->format));
+			return;
+		}
+
+		parent::setValue('');
 	}
 
 	/**
@@ -106,16 +146,50 @@ class DateInput extends \Nette\Forms\Controls\BaseControl
 	public function isFilled()
 	{
 		$value = $this->getRawValue();
-		return $value !== NULL && $value !== array() && $value !== '';
+		return $value !== NULL;
 	}
 
 	/**
-	 * @param \Nella\Forms\DateTime\DateInput
 	 * @return bool
 	 */
-	public function validateDate(DateInput $control)
+	public function validateDate()
 	{
 		return $this->isDisabled() || !$this->isFilled() || $this->getValue() !== NULL;
+	}
+
+	/**
+	 * @param string $input
+	 * @return string
+	 */
+	private function normalizeFormat($input)
+	{
+		if ($this->strict) {
+			return $input;
+		}
+
+		return \Nette\Utils\Strings::replace($input, '~\s+~', '');
+	}
+
+	/**
+	 * @param string|bool $message
+	 * @return \Nella\Forms\DateTime\DateInput
+	 */
+	public function setRequired($message = TRUE)
+	{
+		if ($message !== FALSE && !is_string($message)) {
+			throw new \Nette\InvalidArgumentException('Message must be string');
+		}
+
+		parent::setRequired($message);
+
+		if ($message !== FALSE) {
+			$this->addCondition(Form::FILLED)
+				->addRule(function (DateInput $control) {
+					return $this->validateDate($control);
+				}, $message);
+		}
+
+		return $this;
 	}
 
 	public static function register()
